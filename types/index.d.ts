@@ -1,10 +1,3 @@
-interface Job {
-  title: string;
-  description: string;
-  location: string;
-  requiredSkills: string[];
-}
-
 interface Resume {
   id: string;
   companyName?: string;
@@ -21,6 +14,7 @@ interface Feedback {
     tips: {
       type: "good" | "improve";
       tip: string;
+      explanation: string; // ✅ added for consistency
     }[];
   };
   toneAndStyle: {

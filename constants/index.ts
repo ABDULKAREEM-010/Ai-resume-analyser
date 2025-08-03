@@ -186,12 +186,14 @@ export const AIResponseFormat = `
       interface Feedback {
       overallScore: number; //max 100
       ATS: {
-        score: number; //rate based on ATS suitability
-        tips: {
-          type: "good" | "improve";
-          tip: string; //give 3-4 tips
-        }[];
-      };
+      score: number; //must be between 0 and 100
+      tips: {
+        type: "good" | "improve";
+        tip: string; //short advice title
+        explanation: string; //detailed explanation
+      }[]; //always include at least 3 tips
+    };
+
       toneAndStyle: {
         score: number; //max 100
         tips: {
@@ -236,14 +238,31 @@ export const prepareInstructions = ({
   AIResponseFormat: string;
 }) =>
   `You are an expert in ATS (Applicant Tracking System) and resume analysis.
-  Please analyze and rate this resume and suggest how to improve it.
-  The rating can be low if the resume is bad.
-  Be thorough and detailed. Don't be afraid to point out any mistakes or areas for improvement.
-  If there is a lot to improve, don't hesitate to give low scores. This is to help the user to improve their resume.
-  If available, use the job description for the job user is applying to to give more detailed feedback.
-  If provided, take the job description into consideration.
-  The job title is: ${jobTitle}
-  The job description is: ${jobDescription}
-  Provide the feedback using the following format: ${AIResponseFormat}
-  Return the analysis as a JSON object, without any other text and without the backticks.
-  Do not include any other text or comments.`;
+
+Your task is to analyze and rate the resume for the job mentioned below, and provide detailed, structured feedback that helps the user improve their resume for that specific job.
+
+The job title is: "${jobTitle}"
+The job description is: "${jobDescription}"
+
+### Instructions:
+1. Evaluate the resume for ATS compatibility, tone and style, content, structure, and skills.
+2. Give each section a numeric **score between 0 and 100**.
+3. Provide **at least 3 tips** in each section. Each tip must be an object like:
+   \`\`\`json
+   {
+     "type": "improve" | "good",
+     "tip": "short summary",
+     "explanation": "detailed explanation"
+   }
+   \`\`\`
+4. Your response must follow the structure given in this JSON format:
+   ${AIResponseFormat}
+
+### Strict Requirements:
+- The JSON keys must exactly match the format: \`ATS\`, \`toneAndStyle\`, \`content\`, \`structure\`, \`skills\`, and \`overallScore\`.
+- Each section (ATS, toneAndStyle, content, structure, skills) **must contain a "score" and a "tips" array**.
+- **Do not leave any section empty**.
+- Do **not include markdown**, headers, backticks, commentary, or any additional explanation.
+- Your response must be a **valid JSON object only**.
+
+Return only the JSON.`;
